@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 	"strconv"
 
+	"github.com/sirrah23/task/db"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +18,27 @@ var doTask = &cobra.Command{
 	Long:  `Mark a task on your TODO list as complete`,
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		inputTaskId, _ := strconv.ParseInt(args[0], 10, 64)
-		fmt.Println(inputTaskId)
+		inputTaskID, err := strconv.ParseInt(args[0], 10, 0)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		if inputTaskID < 1 {
+			log.Fatalf("Invalid task ID %d", inputTaskID)
+			return
+		}
+
+		d, err := db.NewConnection()
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		defer d.Close()
+		err = d.DeleteTask(int(inputTaskID - 1))
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 	},
 }

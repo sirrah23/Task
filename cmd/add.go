@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
 	"strings"
 
+	"github.com/sirrah23/task/db"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +19,16 @@ var addTask = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		inputTask := strings.Join(args, " ")
-		fmt.Println(inputTask)
+		d, err := db.NewConnection()
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		defer d.Close()
+		err = d.AddTask(inputTask)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 	},
 }
